@@ -7,6 +7,7 @@ namespace BlackJackLib
     public class Hand
     {
         private List<Card> Cards = new List<Card>();
+        public bool IsSoft { get; private set; } = false; //Set to false, because a hand without Ace is always hard
 
         public Hand() { }
 
@@ -14,7 +15,10 @@ namespace BlackJackLib
         {
             Cards.Add(card);
         }
-
+        /// <summary>
+        /// Returns total value of player's hand
+        /// </summary>
+        /// <returns></returns>
         public int GetTotalValue()
         {
             int totalValue = 0;
@@ -29,11 +33,14 @@ namespace BlackJackLib
                 totalValue += card.GetCardValue();
             }
 
+            if (aceCount > 0) IsSoft = true;
+
             if(totalValue > 21 && aceCount > 0)
             {
-                for(int i = 0; i < aceCount && totalValue > 21; i++)
+                for(int i = 1; i <= aceCount && totalValue > 21; i++)
                 {
                     totalValue -= 10;
+                    if (i == aceCount) IsSoft = false;
                 }
             }
 

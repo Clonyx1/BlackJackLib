@@ -4,9 +4,8 @@ using System.Text;
 
 namespace BlackJackLib
 {
-    public class Player
+    public class Player : Participant
     {
-        public Hand Hand { get;} = new Hand();
         public decimal Balance { get; private set; }
         public decimal Bet { get; private set; }
 
@@ -14,30 +13,13 @@ namespace BlackJackLib
         {
             Balance = balance;
         }
-
-        public bool CanHit()
+        /// <summary>
+        /// Returns true if player has score of less than 21
+        /// </summary>
+        /// <returns></returns>
+        override public bool ShouldHit()
         {
             if (Hand.GetTotalValue() < 21) return true;
-
-            return false;
-        }
-        /// <summary>
-        /// Returns true if player's hand is over 21
-        /// </summary>
-        /// <returns></returns>
-        public bool IsBusted()
-        {
-            if (Hand.GetTotalValue() > 21) return true;
-
-            return false;
-        }
-        /// <summary>
-        /// Returns true if player's hand equals 21
-        /// </summary>
-        /// <returns></returns>
-        public bool HasBlackJack()
-        {
-            if(Hand.GetTotalValue() == 21) return true;
 
             return false;
         }
