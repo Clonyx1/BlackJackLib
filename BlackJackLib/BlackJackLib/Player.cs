@@ -17,7 +17,7 @@ namespace BlackJackLib
         /// Returns true if player has score of less than 21
         /// </summary>
         /// <returns></returns>
-        override public bool ShouldHit()
+        public bool CanHit()
         {
             if (Hand.GetTotalValue() < 21) return true;
 
@@ -31,6 +31,13 @@ namespace BlackJackLib
 
             Bet += betValue;
             Balance -= betValue;
+        }
+        /// <summary>
+        /// Doubles player's bet
+        /// </summary>
+        public void DoubleBet()
+        {
+            Bet *= 2;
         }
         /// <summary>
         /// Adds player's bet * multiplier to player's balance, sets bet to 0

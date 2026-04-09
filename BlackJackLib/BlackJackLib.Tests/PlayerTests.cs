@@ -8,7 +8,7 @@ namespace BlackJackLib.Tests
     public class PlayerTests
     {
         [Fact]
-        public void PlaceBet_VariousValues_ShouldChangeBalanceAndSetBet()
+        public void PlaceBet_ShouldChangeBalanceAndSetBet()
         {
             //Arrange
             decimal playerBalance = 150;
@@ -30,7 +30,7 @@ namespace BlackJackLib.Tests
         [Theory]
         [InlineData(150, 150.7)]
         [InlineData(150, -15)]
-        public void PlaceBet_ShouldThrowArgumentException(decimal playerBalance, decimal betValue)
+        public void PlaceBet_VariousValues_ShouldThrowArgumentException(decimal playerBalance, decimal betValue)
         {
             //Arrange
             Player player = new Player(playerBalance);

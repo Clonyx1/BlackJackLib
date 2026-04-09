@@ -8,8 +8,6 @@ namespace BlackJackLib
     {
         public Hand Hand { get; } = new Hand();
 
-        public abstract bool ShouldHit();
-
         /// <summary>
         /// Returns true if player's hand is over 21
         /// </summary>
