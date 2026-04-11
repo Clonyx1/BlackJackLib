@@ -4,8 +4,15 @@ using System.Text;
 
 namespace BlackJackLib
 {
+    /// <summary>
+    /// Standard Black Jack deck with 52 cards
+    /// </summary>
     public class StandardDeck : BaseDeck
     {
+        public StandardDeck()
+        {
+            Shuffle();
+        }
         protected override void Initialize()
         {
             foreach(var suitIndex in Enum.GetValues(typeof(Suit)))

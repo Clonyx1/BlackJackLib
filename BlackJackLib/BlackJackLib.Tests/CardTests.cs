@@ -1,6 +1,4 @@
-﻿using BlackJackLib;
-
-namespace BlackJackLib.Tests
+﻿namespace BlackJackLib.Tests
 {
     public class CardTests
     {

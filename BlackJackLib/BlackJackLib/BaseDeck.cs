@@ -10,7 +10,8 @@ namespace BlackJackLib
     public abstract class BaseDeck : IDeck
     {
         protected List<Card> _cards = new List<Card>();
-        public int RemainingCards => _cards.Count;
+        public IReadOnlyList<Card> Cards { get { return _cards; } }
+        public int RemainingCardsCount => _cards.Count;
 
         protected BaseDeck()
         {
@@ -25,7 +26,7 @@ namespace BlackJackLib
         /// <exception cref="InvalidOperationException"></exception>
         public Card Draw()
         {
-            if (RemainingCards == 0) throw new InvalidOperationException("Balíček je prázdný");
+            if (RemainingCardsCount == 0) throw new InvalidOperationException("Balíček je prázdný");
 
             Card card = _cards[0];
             _cards.RemoveAt(0);

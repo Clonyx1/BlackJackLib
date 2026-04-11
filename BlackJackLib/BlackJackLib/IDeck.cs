@@ -11,6 +11,6 @@ namespace BlackJackLib
     {
         Card Draw();
         void Shuffle();
-        int RemainingCards { get; }
+        int RemainingCardsCount { get; }
     }
 }
