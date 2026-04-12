@@ -1,7 +1,8 @@
 ﻿namespace BlackJackLib
 {
-    public class Dealer : Participant
+    public class Dealer
     {
+        private Hand Hand { get; } = new Hand();
         /// <summary>
         /// Returns true if dealer should hit
         /// </summary>

@@ -4,64 +4,58 @@ using System.Text;
 
 namespace BlackJackLib
 {
-    public class Player : Participant
+    public class Player
     {
-        public decimal Balance { get; private set; }
-        public decimal Bet { get; private set; }
+        private List<Hand> _hands = new();
+        public IReadOnlyCollection<Hand> Hands { get { return _hands; } }
+        private decimal Balance;
+        private PlayerState playerState = PlayerState.Betting;
 
         public Player(decimal balance)
         {
             Balance = balance;
         }
         /// <summary>
-        /// Returns true if player has score of less than 21
+        /// Returns true if player has score of less than 21 in at least one hand
         /// </summary>
         /// <returns></returns>
         public bool CanHit()
         {
-            if (Hand.GetTotalValue() < 21) return true;
+            foreach (var hand in _hands)
+            {
+                if (hand.GetTotalValue() < 21) return true;
+            }
 
             return false;
         }
 
-        public void PlaceBet(decimal betValue)
+        public void PlaceBet(decimal betAmount)
         {
-            if (betValue <= 0) throw new ArgumentException("Bet must be positive");
-            if (Balance < betValue) throw new ArgumentException("Insufficient balance");
+            if(_hands.Count == 0 && playerState == PlayerState.Betting)
+            {
+                if (betAmount <= 0) throw new ArgumentException("Bet must be positive");
+                if (Balance < betAmount) throw new ArgumentException("Insufficient balance");
 
-            Bet += betValue;
-            Balance -= betValue;
+                Hand hand = new Hand();
+                hand.PlaceBet(betAmount);
+                _hands.Add(hand);
+                Balance -= betAmount;
+                playerState = PlayerState.Playing;
+            }
+            else
+            {
+                throw new InvalidOperationException("Can not place a bet if player has more than one hand");
+            }
         }
         /// <summary>
         /// Doubles player's bet
         /// </summary>
         public void DoubleBet()
         {
-            Bet *= 2;
-        }
-        /// <summary>
-        /// Adds player's bet * multiplier to player's balance, sets bet to 0
-        /// </summary>
-        /// <param name="multiplier"></param>
-        public void Win(decimal multiplier)
-        {
-            Balance += Bet * multiplier;
-            Bet = 0;
-        }
-        /// <summary>
-        /// Returns player's bet to balance, sets bet to 0
-        /// </summary>
-        public void Push()
-        {
-            Balance += Bet;
-            Bet = 0;
-        }
-        /// <summary>
-        /// Sets bet to 0
-        /// </summary>
-        public void Lose()
-        {
-            Bet = 0;
+            if(_hands.Count == 1 && playerState == PlayerState.Playing)
+            {
+                _hands[0].DoubleBet();
+            }
         }
     }
 }
