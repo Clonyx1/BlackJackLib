@@ -7,14 +7,53 @@ namespace BlackJackLib
     public class Hand
     {
         private List<Card> _cards = new List<Card>();
+        public IReadOnlyCollection<Card> Cards { get { return _cards; } }
         public decimal BetAmount { get; private set; }
         public bool IsSoft { get; private set; } = false; //Set to false, because a hand without Ace is always hard
+        public bool IsFinished { get; private set; } //Whether player stands/already busted
 
         public Hand() { }
-
+        public Hand(decimal betAmount)
+        {
+            PlaceBet(betAmount);
+        }
+        /// <summary>
+        /// Adds card into hand
+        /// </summary>
+        /// <param name="card"></param>
         public void AddCard(Card card)
         {
             _cards.Add(card);
+        }
+        /// <summary>
+        /// Returns true if hand has score of less than 21
+        /// </summary>
+        /// <returns></returns>
+        public bool CanHit()
+        {
+            if(GetTotalValue() < 21) return true;
+
+            return false;
+        }
+        /// <summary>
+        /// Gives player a card from deck
+        /// </summary>
+        /// <param name="deck"></param>
+        /// <returns></returns>
+        public Result<Card> Hit(IDeck deck)
+        {
+            if (IsFinished) Result<Card>.Failure("This hand is already finished");
+            if (!CanHit()) Result<Card>.Failure("Player can not hit with this hand");
+
+            var card = deck.Draw();
+            _cards.Add(card);
+
+            if (IsBusted())
+            {
+                IsFinished = true;
+            }
+
+            return Result<Card>.Success(card);
         }
         /// <summary>
         /// Returns total value of hand
