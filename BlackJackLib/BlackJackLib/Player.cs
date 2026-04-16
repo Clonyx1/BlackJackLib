@@ -91,13 +91,13 @@ namespace BlackJackLib
             var card1 = cardsInHand[0];
             var card2 = cardsInHand[1];
 
-            Hand hand1 = new Hand(betAmount);
-            hand1.AddCard(card1);
-            hand1.AddCard(deck.Draw());
+            var result = CreateSplitHand(card1, betAmount, deck);
+            if (!result.IsSuccess) return Result<List<Hand>>.Failure(result.ErrorMessage);
+            var hand1 = result.Value;
 
-            Hand hand2 = new Hand(betAmount);
-            hand2.AddCard(card2);
-            hand2.AddCard(deck.Draw());
+            var result2 = CreateSplitHand(card2, betAmount, deck);
+            if(!result2.IsSuccess) return Result<List<Hand>>.Failure(result2.ErrorMessage);
+            var hand2 = result2.Value;
 
             _hands.Clear();
 
@@ -105,6 +105,24 @@ namespace BlackJackLib
             _hands.Add(hand2);
 
             return Result<List<Hand>>.Success(_hands);
+        }
+        /// <summary>
+        /// Helper method for Split()
+        /// Creates hand from given parameters
+        /// </summary>
+        /// <returns></returns>
+        private Result<Hand> CreateSplitHand(Card card, decimal betAmount, IDeck deck)
+        {
+            Hand hand = new Hand(betAmount);
+            hand.AddCard(card);
+
+            var result = deck.Draw();
+            if (!result.IsSuccess) return Result<Hand>.Failure("Deck is empty");
+
+            var drawnCard = result.Value;
+            hand.AddCard(drawnCard);
+
+            return Result<Hand>.Success(hand);
         }
         /// <summary>
         /// Determines whether player can split according to standard Black Jack rules

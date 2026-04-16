@@ -9,7 +9,7 @@ namespace BlackJackLib
     /// </summary>
     public interface IDeck
     {
-        Card Draw();
+        Result<Card> Draw();
         void Shuffle();
         int RemainingCardsCount { get; }
     }

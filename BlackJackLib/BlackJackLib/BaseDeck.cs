@@ -24,14 +24,14 @@ namespace BlackJackLib
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public Card Draw()
+        public Result<Card> Draw()
         {
-            if (RemainingCardsCount == 0) throw new InvalidOperationException("Balíček je prázdný");
+            if (RemainingCardsCount == 0) return Result<Card>.Failure("Deck is empty");
 
             Card card = _cards[0];
             _cards.RemoveAt(0);
 
-            return card;
+            return Result<Card>.Success(card);
         }
         /// <summary>
         /// Shuffles cards in deck

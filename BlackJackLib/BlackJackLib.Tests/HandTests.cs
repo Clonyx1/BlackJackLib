@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Text;
 
 namespace BlackJackLib.Tests
@@ -57,6 +58,79 @@ namespace BlackJackLib.Tests
 
             //Assert
             Assert.Equal(expectedState, hand.IsSoft);
+        }
+
+        [Fact]
+        public void Hit_ReturnSuccess()
+        {
+            //Arrange
+            StandardDeck deck = new StandardDeck();
+            Hand hand = new Hand();
+            
+            //Act
+            Result<Card> result = hand.Hit(deck);
+
+            //Assert
+            Assert.True(result.IsSuccess);
+            Assert.Contains(result.Value, hand.Cards);
+        }
+
+        [Fact]
+        public void Hit_HandStand_ReturnFailure()
+        {
+            //Arrange
+            StandardDeck deck = new StandardDeck();
+            Hand hand = new Hand();
+            hand.Stand();
+            //Act
+            Result result = hand.Hit(deck);
+
+            //Assert
+            Assert.False(result.IsSuccess);
+        }
+        [Fact]
+        public void Hit_HandHasBlackJack_ReturnFailure()
+        {
+            //Arrange
+            StandardDeck deck = new StandardDeck();
+            var hand = new Hand();
+            hand.AddCard(new Card(CardRank.Ace, Suit.Hearts));
+            hand.AddCard(new Card(CardRank.Jack, Suit.Hearts));
+
+            //Act
+            Result result = hand.Hit(deck);
+
+            //Assert
+            Assert.False(result.IsSuccess);
+        }
+        [Fact]
+        public void Hit_HandIsBusted_ReturnFailure()
+        {
+            //Arrange
+            StandardDeck deck = new StandardDeck();
+            Hand hand = new Hand();
+            hand.AddCard(new Card(CardRank.Jack, Suit.Hearts));
+            hand.AddCard(new Card(CardRank.Jack, Suit.Spades));
+            hand.AddCard(new Card(CardRank.Jack, Suit.Diamonds));
+
+            //Act
+            Result result = hand.Hit(deck);
+
+            //Assert
+            Assert.False(result.IsSuccess);
+        }
+        [Fact]
+        public void Hit_EmptyDeck_ReturnFailure()
+        {
+            //Arranege
+            EmptyDeck emptyDeck = new EmptyDeck();
+            var hand = new Hand();
+
+            //Act
+            var result = hand.Hit(emptyDeck);
+
+            //Assert
+            Assert.False(result.IsSuccess);
         }
     }
 }

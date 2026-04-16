@@ -10,7 +10,10 @@ namespace BlackJackLib
         public IReadOnlyCollection<Card> Cards { get { return _cards; } }
         public decimal BetAmount { get; private set; }
         public bool IsSoft { get; private set; } = false; //Set to false, because a hand without Ace is always hard
-        public bool IsFinished { get; private set; } //Whether player stands/already busted
+        public bool IsBusted => GetTotalValue() > 21;
+        public bool HasBlackJack => GetTotalValue() == 21;
+        public bool IsStanding = false;
+        public bool IsFinished  => IsBusted || HasBlackJack || IsStanding;//Whether player stands/already busted
 
         public Hand() { }
         public Hand(decimal betAmount)
@@ -19,8 +22,9 @@ namespace BlackJackLib
         }
         /// <summary>
         /// Adds card into hand
+        /// Sets IsFinished to true if hand has Black Jack or is busted
         /// </summary>
-        /// <param name="card"></param>
+        /// <param name="card">Card to add into hand</param>
         public void AddCard(Card card)
         {
             _cards.Add(card);
@@ -42,18 +46,23 @@ namespace BlackJackLib
         /// <returns></returns>
         public Result<Card> Hit(IDeck deck)
         {
-            if (IsFinished) Result<Card>.Failure("This hand is already finished");
-            if (!CanHit()) Result<Card>.Failure("Player can not hit with this hand");
+            if (IsFinished) return Result<Card>.Failure("This hand is already finished");
+            if (!CanHit()) return Result<Card>.Failure("Player can not hit with this hand");
 
-            var card = deck.Draw();
-            _cards.Add(card);
+            var result = deck.Draw();
+            if (!result.IsSuccess) return Result<Card>.Failure("Deck is empty");
 
-            if (IsBusted())
-            {
-                IsFinished = true;
-            }
+            Card card = result.Value;
+            AddCard(card);
 
             return Result<Card>.Success(card);
+        }
+        /// <summary>
+        /// Sets IsFinished to true
+        /// </summary>
+        public void Stand()
+        {
+            IsStanding = true;
         }
         /// <summary>
         /// Returns total value of hand
@@ -85,26 +94,6 @@ namespace BlackJackLib
             }
 
             return totalValue;
-        }
-        /// <summary>
-        /// Returns true if hand is over 21
-        /// </summary>
-        /// <returns></returns>
-        public bool IsBusted()
-        {
-            if (GetTotalValue() > 21) return true;
-
-            return false;
-        }
-        /// <summary>
-        /// Returns true if hand equals 21
-        /// </summary>
-        /// <returns></returns>
-        public bool HasBlackJack()
-        {
-            if (GetTotalValue() == 21) return true;
-
-            return false;
         }
 
         /// <summary>
