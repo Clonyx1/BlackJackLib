@@ -132,5 +132,20 @@ namespace BlackJackLib.Tests
             //Assert
             Assert.False(result.IsSuccess);
         }
+
+        [Fact]
+        public void DoubleBet_ShouldDoubleBet()
+        {
+            //Arrange
+            var hand = new Hand(100);
+            hand.PlaceBet(50);
+
+            //Act
+            hand.DoubleBet();
+
+            //Assert
+            var expectedValue = 100;
+            Assert.Equal(expectedValue, hand.BetAmount);
+        }
     }
 }

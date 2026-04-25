@@ -76,6 +76,27 @@ namespace BlackJackLib
 
             return Result<Hand>.Success(hand);
         }
+        public Result Surrender()
+        {
+            if (!CanSurrender()) return Result.Failure("Can not surrender");
+
+            foreach(var hand in _hands)
+            {
+                hand.Surrender();
+            }
+
+            return Result.Success();
+        }
+        private bool CanSurrender()
+        {
+            if(_hands.Count == 1)
+            {
+                var hand = GetActiveHand();
+                if (hand.Cards.Count <= 2 && hand.HasPerformedAction == false) return true;
+            }
+
+            return false;
+        }
         /// <summary>
         /// Splits player's hand into two separate hands and draws an additional card into each
         /// </summary>
@@ -113,7 +134,7 @@ namespace BlackJackLib
         /// <returns></returns>
         private Result<Hand> CreateSplitHand(Card card, decimal betAmount, IDeck deck)
         {
-            Hand hand = new Hand(betAmount);
+            Hand hand = new Hand(betAmount, true); //set is result of split to true
             hand.AddCard(card);
 
             var result = deck.Draw();

@@ -10,14 +10,21 @@ namespace BlackJackLib
         public IReadOnlyCollection<Card> Cards { get { return _cards; } }
         public decimal BetAmount { get; private set; }
         public bool IsSoft { get; private set; } = false; //Set to false, because a hand without Ace is always hard
+        public bool HasPerformedAction { get; private set; } = false;
+        public bool IsResultOfSplit { get; private set; }
         public bool IsBusted => GetTotalValue() > 21;
         public bool HasBlackJack => GetTotalValue() == 21;
-        public bool IsStanding = false;
+        public bool IsStanding { get; private set; } = false;
+        public bool IsSurrendered { get; private set; } = false;
         public bool IsFinished  => IsBusted || HasBlackJack || IsStanding;//Whether player stands/already busted
 
-        public Hand() { }
-        public Hand(decimal betAmount)
+        public Hand(bool isResultOfSplit = false) 
+        { 
+            this.IsResultOfSplit = isResultOfSplit;
+        }
+        public Hand(decimal betAmount, bool isResultOfSplit = false)
         {
+            this.IsResultOfSplit = isResultOfSplit;
             PlaceBet(betAmount);
         }
         /// <summary>
@@ -55,6 +62,7 @@ namespace BlackJackLib
             Card card = result.Value;
             AddCard(card);
 
+            HasPerformedAction = true;
             return Result<Card>.Success(card);
         }
         /// <summary>
@@ -62,7 +70,16 @@ namespace BlackJackLib
         /// </summary>
         public void Stand()
         {
+            HasPerformedAction = true;
             IsStanding = true;
+        }
+        /// <summary>
+        /// Sets IsSurrendered to true
+        /// </summary>
+        public void Surrender()
+        {
+            HasPerformedAction = true;
+            IsSurrendered = true;
         }
         /// <summary>
         /// Returns total value of hand
@@ -112,6 +129,7 @@ namespace BlackJackLib
         /// </summary>
         public void DoubleBet()
         {
+            HasPerformedAction = true;
             BetAmount *= 2;
         }
         /// <summary>
