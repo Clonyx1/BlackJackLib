@@ -26,7 +26,7 @@ namespace BlackJackLib
         /// <summary>
         /// Player gets a card from deck
         /// </summary>
-        /// <param name="deck"></param>
+        /// <param name="deck">Deck to take card from</param>
         /// <returns></returns>
         public Result<Card> HitActiveHand(IDeck deck)
         {
@@ -36,13 +36,16 @@ namespace BlackJackLib
 
             return hand.Hit(deck);
         }
-
+        /// <summary>
+        /// Creates new hand, assigns a bet of given amount to hand and adds hand into hands list
+        /// </summary>
+        /// <param name="betAmount"></param>
+        /// <returns></returns>
         public Result PlaceBet(decimal betAmount)
         {
-            if (!CanPlaceBet()) return Result.Failure("Can not place a bet");
+            var validation = ValidatePlaceBet(betAmount);
 
-            if (betAmount <= 0) return Result.Failure("Bet must be positive");
-            if (Balance < betAmount) return Result.Failure("Insufficient balance");
+            if (!validation.IsSuccess) return validation;
 
             Hand hand = new Hand();
             hand.PlaceBet(betAmount);
@@ -56,29 +59,50 @@ namespace BlackJackLib
         /// Determines whether player can place a bet
         /// </summary>
         /// <returns></returns>
-        public bool CanPlaceBet()
+        public Result ValidatePlaceBet(decimal betAmount)
         {
-            if (_hands.Count == 0 && playerState == PlayerState.Betting) return true;
+            if (betAmount <= 0) return Result.Failure("Bet must be positive");
+            if (Balance < betAmount) return Result.Failure("Insufficient balance");
 
-            return false;
+            return Result.Success();
         }
         /// <summary>
         /// Doubles player's bet in active hand
         /// </summary>
         public Result<Hand> DoubleBet()
         {
-            if(playerState != PlayerState.Playing) return Result<Hand>.Failure("Player is not in playing state");
+            var validation = ValidateDoubleBet();
             
-            var hand = GetActiveHand();
-            if (hand == null) return Result<Hand>.Failure("Player does not have any active hands");
+            if(!validation.IsSuccess) return (Result<Hand>)validation;
 
+            var hand = GetActiveHand();
             hand.DoubleBet();
 
             return Result<Hand>.Success(hand);
         }
+        /// <summary>
+        /// Determines whether player can hit active hand
+        /// </summary>
+        /// <returns></returns>
+        public Result ValidateDoubleBet()
+        {
+            var hand = GetActiveHand();
+            if (hand == null) return Result.Failure("Player does not have any active hands");
+            if (hand.BetAmount > Balance) return Result.Failure("Insufficient funds");
+            if (playerState != PlayerState.Playing) return Result.Failure("Player is not playing");
+            if (hand.WasDoubled) return Result.Failure("Hand was already doubled");
+
+            return Result.Success();
+        }
+        /// <summary>
+        /// Makes player surrender
+        /// </summary>
+        /// <returns></returns>
         public Result Surrender()
         {
-            if (!CanSurrender()) return Result.Failure("Can not surrender");
+            var validation = ValidateSurrender();
+
+            if (!validation.IsSuccess) return validation;
 
             foreach(var hand in _hands)
             {
@@ -87,22 +111,26 @@ namespace BlackJackLib
 
             return Result.Success();
         }
-        private bool CanSurrender()
+        /// <summary>
+        /// Determines whether player can surrender
+        /// </summary>
+        /// <returns></returns>
+        public Result ValidateSurrender()
         {
-            if(_hands.Count == 1)
-            {
-                var hand = GetActiveHand();
-                if (hand.Cards.Count <= 2 && hand.HasPerformedAction == false) return true;
-            }
+            if (_hands.Count > 1) return Result.Failure("Can not surrender after split");
+            var hand = GetActiveHand();
+            if (hand.Cards.Count > 2) return Result.Failure("Can not surrender with more than 2 cards");
+            if (hand.HasPerformedAction) return Result.Failure("Can not surrender after performing action");
 
-            return false;
+            return Result.Success();
         }
         /// <summary>
         /// Splits player's hand into two separate hands and draws an additional card into each
         /// </summary>
         public Result<List<Hand>> Split(IDeck deck)
         {
-            if (!CanSplit()) return Result<List<Hand>>.Failure("Player can not split hand");
+            var validation = ValidateSplit();
+            if (!validation.IsSuccess) return (Result<List<Hand>>)validation;
 
             Hand currentHand = _hands[0];
             decimal betAmount = currentHand.BetAmount;
@@ -147,29 +175,26 @@ namespace BlackJackLib
         }
         /// <summary>
         /// Determines whether player can split according to standard Black Jack rules
-        /// (= Has one hand that contains precisely 2 cards with the same rank and has enough balance)
+        /// (= Has one hand that contains precisely 2 cards with the same value and has enough balance)
+        /// (This method allows split based on value => for example King and Queen split is possible)
         /// </summary>
         /// <returns></returns>
-        public bool CanSplit()
+        public Result ValidateSplit()
         {
-            if(Hands.Count == 1 && playerState == PlayerState.Playing)
-            {
-                if (Balance > _hands[0].BetAmount * 2)
-                {
-                    var hand = _hands[0];
-                    List<Card> cardsInHand = hand.Cards.ToList();
+            if (Hands.Count > 1) return Result.Failure("Can not split with more than 1 hand");
+            if (playerState != PlayerState.Playing) return Result.Failure("Player is not playing");
+            var hand = GetActiveHand();
+            if (Balance < hand.BetAmount * 2) return Result.Failure("Insufficient balance");
+            var cardsInHand = hand.Cards.ToList();
+            var cardsInHandCount = cardsInHand.Count;
+            if (cardsInHandCount < 2) return Result.Failure("Can not split with less than 2 cards in hand");
+            if (cardsInHandCount > 2) return Result.Failure("Can not split with more than 2 cards in hand");
 
-                    if (cardsInHand.Count == 2)
-                    {
-                        var card1 = cardsInHand[0];
-                        var card2 = cardsInHand[1];
+            var card1 = cardsInHand[0];
+            var card2 = cardsInHand[1];
+            if (card1.GetCardValue != card2.GetCardValue) return Result.Failure("Can not split hand with 2 cards of different values");
 
-                        if (card1.Rank == card2.Rank) return true;
-                    }
-                }
-            }
-
-            return false;
+            return Result.Success();
         }
     }
 }

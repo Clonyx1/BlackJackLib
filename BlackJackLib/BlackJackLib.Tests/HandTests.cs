@@ -34,32 +34,6 @@ namespace BlackJackLib.Tests
             Assert.Equal(expectedValue, totalValue);
         }
 
-        public static IEnumerable<object[]> TestData2 =>
-            new List<object[]>
-            {
-                new object[] {new List<Card> { new Card(CardRank.Ace, Suit.Hearts), new Card(CardRank.Ace, Suit.Diamonds), new Card(CardRank.Five, Suit.Spades) }, true },
-                new object[] { new List<Card> { new Card(CardRank.King, Suit.Diamonds), new Card(CardRank.Eight, Suit.Hearts)}, false },
-                new object[] { new List<Card> { new Card(CardRank.King, Suit.Spades), new Card(CardRank.Queen, Suit.Clubs), new Card(CardRank.Ace, Suit.Spades)}, false }
-            };
-
-        [Theory]
-        [MemberData(nameof(TestData2))]
-        public void GetTotalValue_VariousInputs_SetIsSoftToCorrectState(List<Card> cards, bool expectedState)
-        {
-            //Arrange
-            Hand hand = new Hand();
-            foreach (Card card in cards)
-            {
-                hand.AddCard(card);
-            }
-
-            //Act
-            hand.GetTotalValue(); //Should change IsSoft state
-
-            //Assert
-            Assert.Equal(expectedState, hand.IsSoft);
-        }
-
         [Fact]
         public void Hit_ReturnSuccess()
         {
@@ -146,6 +120,29 @@ namespace BlackJackLib.Tests
             //Assert
             var expectedValue = 100;
             Assert.Equal(expectedValue, hand.BetAmount);
+        }
+        public static IEnumerable<object[]> TestData2 =>
+            new List<object[]>
+            {
+                new object[] {new List<Card> { new Card(CardRank.Ace, Suit.Hearts), new Card(CardRank.Ace, Suit.Diamonds), new Card(CardRank.Five, Suit.Spades) }, true },
+                new object[] { new List<Card> { new Card(CardRank.King, Suit.Diamonds), new Card(CardRank.Eight, Suit.Hearts)}, false },
+                new object[] { new List<Card> { new Card(CardRank.King, Suit.Spades), new Card(CardRank.Queen, Suit.Clubs), new Card(CardRank.Ace, Suit.Spades)}, false },
+                new object[] {new List<Card> { new Card(CardRank.Ace, Suit.Hearts), new Card(CardRank.Ace, Suit.Clubs), new Card(CardRank.Ace, Suit.Diamonds)}, true }
+            };
+
+        [Theory]
+        [MemberData(nameof(TestData2))]
+        public void IsHandSoft_VariousInputs_IsSoftIsCorrectState(List<Card> cards, bool expectedState)
+        {
+            //Arrange
+            Hand hand = new Hand();
+            foreach (Card card in cards)
+            {
+                hand.AddCard(card);
+            }
+
+            //Act & Assert
+            Assert.Equal(expectedState, hand.IsSoft);
         }
     }
 }

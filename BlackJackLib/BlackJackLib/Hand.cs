@@ -9,8 +9,9 @@ namespace BlackJackLib
         private List<Card> _cards = new List<Card>();
         public IReadOnlyCollection<Card> Cards { get { return _cards; } }
         public decimal BetAmount { get; private set; }
-        public bool IsSoft { get; private set; } = false; //Set to false, because a hand without Ace is always hard
+        public bool IsSoft => IsHandSoft();
         public bool HasPerformedAction { get; private set; } = false;
+        public bool WasDoubled { get; private set; } = false;
         public bool IsResultOfSplit { get; private set; }
         public bool IsBusted => GetTotalValue() > 21;
         public bool HasBlackJack => GetTotalValue() == 21;
@@ -92,25 +93,43 @@ namespace BlackJackLib
 
             foreach (Card card in _cards)
             {
-                if(card.Rank == CardRank.Ace)
-                {
-                    aceCount++;
-                }
                 totalValue += card.GetCardValue();
+                if (card.Rank == CardRank.Ace) aceCount++;
             }
 
-            if (aceCount > 0) IsSoft = true;
 
             if(totalValue > 21 && aceCount > 0)
             {
                 for(int i = 1; i <= aceCount && totalValue > 21; i++)
                 {
                     totalValue -= 10;
-                    if (i == aceCount) IsSoft = false;
                 }
             }
 
             return totalValue;
+        }
+        /// <summary>
+        /// Method to determine whether hand is soft
+        /// </summary>
+        /// <returns></returns>
+        private bool IsHandSoft()
+        {
+            int totalValue = 0;
+            int aceCount = 0;
+
+            foreach (Card card in _cards)
+            {
+                totalValue += card.GetCardValue();
+                if (card.Rank == CardRank.Ace) aceCount++;
+            }
+
+            while(totalValue > 21 && aceCount > 0)
+            {
+                totalValue -= 10;
+                aceCount--;
+            }
+
+            return aceCount > 0;
         }
 
         /// <summary>
@@ -130,6 +149,7 @@ namespace BlackJackLib
         public void DoubleBet()
         {
             HasPerformedAction = true;
+            WasDoubled = true;
             BetAmount *= 2;
         }
         /// <summary>
