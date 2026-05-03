@@ -38,33 +38,33 @@ namespace BlackJackLib
             _cards.Add(card);
         }
         /// <summary>
-        /// Returns true if hand has score of less than 21
-        /// </summary>
-        /// <returns></returns>
-        public bool CanHit()
-        {
-            if(GetTotalValue() < 21) return true;
-
-            return false;
-        }
-        /// <summary>
         /// Gives player a card from deck
         /// </summary>
         /// <param name="deck"></param>
         /// <returns></returns>
         public Result<Card> Hit(IDeck deck)
         {
-            if (IsFinished) return Result<Card>.Failure("This hand is already finished");
-            if (!CanHit()) return Result<Card>.Failure("Player can not hit with this hand");
+            var validation = ValidateHit();
+            if (!validation.IsSuccess) return (Result<Card>)validation;
 
             var result = deck.Draw();
-            if (!result.IsSuccess) return Result<Card>.Failure("Deck is empty");
+            if (!result.IsSuccess) return result;
 
             Card card = result.Value;
             AddCard(card);
 
             HasPerformedAction = true;
             return Result<Card>.Success(card);
+        }
+        /// <summary>
+        /// Checks if hit is possible with this hand
+        /// </summary>
+        /// <returns></returns>
+        public Result ValidateHit()
+        {
+            if (IsFinished) return Result.Failure("Hand is finished");
+
+            return Result.Success();
         }
         /// <summary>
         /// Sets IsFinished to true
@@ -136,7 +136,7 @@ namespace BlackJackLib
         /// Sets BetAmount to a given number
         /// </summary>
         /// <param name="betAmount"></param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException">Bet has to be positive number</exception>
         public void PlaceBet(decimal betAmount)
         {
             if (betAmount <= 0) throw new ArgumentException("Bet must be positive");
@@ -154,9 +154,10 @@ namespace BlackJackLib
         }
         /// <summary>
         /// Returns BetAmount * multiplier
+        /// Multiplier is set to 2 by default
         /// </summary>
         /// <param name="multiplier"></param>
-        public decimal Win(decimal multiplier)
+        public decimal Win(decimal multiplier = 2.0m)
         {
             return BetAmount * multiplier;
         }

@@ -30,11 +30,23 @@ namespace BlackJackLib
         /// <returns></returns>
         public Result<Card> HitActiveHand(IDeck deck)
         {
+            var validation = ValidateHit();
+
+            if (!validation.IsSuccess) return (Result<Card>)validation;
+
             var hand = GetActiveHand();
 
-            if (hand == null) return Result<Card>.Failure("All hands are finished");
-
             return hand.Hit(deck);
+        }
+        public Result ValidateHit()
+        {
+            var hand = GetActiveHand();
+            if (hand == null) return Result.Failure("All hands are finished");
+
+            var validation = hand.ValidateHit();
+            if (!validation.IsSuccess) return validation;
+
+            return Result.Success();
         }
         /// <summary>
         /// Creates new hand, assigns a bet of given amount to hand and adds hand into hands list
@@ -81,7 +93,7 @@ namespace BlackJackLib
             return Result<Hand>.Success(hand);
         }
         /// <summary>
-        /// Determines whether player can hit active hand
+        /// Validates whether player can double active hand's bet
         /// </summary>
         /// <returns></returns>
         public Result ValidateDoubleBet()
@@ -184,11 +196,12 @@ namespace BlackJackLib
             if (Hands.Count > 1) return Result.Failure("Can not split with more than 1 hand");
             if (playerState != PlayerState.Playing) return Result.Failure("Player is not playing");
             var hand = GetActiveHand();
-            if (Balance < hand.BetAmount * 2) return Result.Failure("Insufficient balance");
+            if (Balance < hand.BetAmount) return Result.Failure("Insufficient balance");
+
             var cardsInHand = hand.Cards.ToList();
-            var cardsInHandCount = cardsInHand.Count;
-            if (cardsInHandCount < 2) return Result.Failure("Can not split with less than 2 cards in hand");
-            if (cardsInHandCount > 2) return Result.Failure("Can not split with more than 2 cards in hand");
+
+            if (cardsInHand.Count < 2) return Result.Failure("Can not split with less than 2 cards in hand");
+            if (cardsInHand.Count > 2) return Result.Failure("Can not split with more than 2 cards in hand");
 
             var card1 = cardsInHand[0];
             var card2 = cardsInHand[1];
