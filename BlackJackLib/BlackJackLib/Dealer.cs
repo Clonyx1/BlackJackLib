@@ -3,6 +3,14 @@
     public class Dealer
     {
         private Hand Hand { get; } = new Hand();
+        
+        /// <summary>
+        /// Dealer gets a card
+        /// </summary>
+        public void Hit(IDeck deck)
+        {
+            Hand.Hit(deck);
+        }
         /// <summary>
         /// Returns true if dealer should hit
         /// </summary>

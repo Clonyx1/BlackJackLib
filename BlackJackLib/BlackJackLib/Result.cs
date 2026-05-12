@@ -7,6 +7,7 @@ namespace BlackJackLib
     public class Result
     {
         public bool IsSuccess { get; protected set; }
+        public bool IsFailure => !IsSuccess;
         public string? ErrorMessage { get; protected set; }
 
         protected Result(bool success, string? message)

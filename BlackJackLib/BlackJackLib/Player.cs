@@ -32,7 +32,7 @@ namespace BlackJackLib
         {
             var validation = ValidateHit();
 
-            if (!validation.IsSuccess) return (Result<Card>)validation;
+            if (validation.IsFailure) return (Result<Card>)validation;
 
             var hand = GetActiveHand();
 
@@ -44,7 +44,7 @@ namespace BlackJackLib
             if (hand == null) return Result.Failure("All hands are finished");
 
             var validation = hand.ValidateHit();
-            if (!validation.IsSuccess) return validation;
+            if (validation.IsFailure) return validation;
 
             return Result.Success();
         }
@@ -57,7 +57,7 @@ namespace BlackJackLib
         {
             var validation = ValidatePlaceBet(betAmount);
 
-            if (!validation.IsSuccess) return validation;
+            if (validation.IsFailure) return validation;
 
             Hand hand = new Hand();
             hand.PlaceBet(betAmount);
@@ -81,14 +81,14 @@ namespace BlackJackLib
         /// <summary>
         /// Doubles player's bet in active hand
         /// </summary>
-        public Result<Hand> DoubleBet()
+        public Result<Hand> DoubleBet(IDeck deck)
         {
             var validation = ValidateDoubleBet();
             
-            if(!validation.IsSuccess) return (Result<Hand>)validation;
+            if(validation.IsFailure) return (Result<Hand>)validation;
 
             var hand = GetActiveHand();
-            hand.DoubleBet();
+            hand.DoubleBet(deck);
 
             return Result<Hand>.Success(hand);
         }
@@ -114,7 +114,7 @@ namespace BlackJackLib
         {
             var validation = ValidateSurrender();
 
-            if (!validation.IsSuccess) return validation;
+            if (validation.IsFailure) return validation;
 
             foreach(var hand in _hands)
             {
@@ -142,7 +142,7 @@ namespace BlackJackLib
         public Result<List<Hand>> Split(IDeck deck)
         {
             var validation = ValidateSplit();
-            if (!validation.IsSuccess) return (Result<List<Hand>>)validation;
+            if (validation.IsFailure) return (Result<List<Hand>>)validation;
 
             Hand currentHand = _hands[0];
             decimal betAmount = currentHand.BetAmount;
@@ -153,11 +153,11 @@ namespace BlackJackLib
             var card2 = cardsInHand[1];
 
             var result = CreateSplitHand(card1, betAmount, deck);
-            if (!result.IsSuccess) return Result<List<Hand>>.Failure(result.ErrorMessage);
+            if (result.IsFailure) return Result<List<Hand>>.Failure(result.ErrorMessage);
             var hand1 = result.Value;
 
             var result2 = CreateSplitHand(card2, betAmount, deck);
-            if(!result2.IsSuccess) return Result<List<Hand>>.Failure(result2.ErrorMessage);
+            if(result2.IsFailure) return Result<List<Hand>>.Failure(result2.ErrorMessage);
             var hand2 = result2.Value;
 
             _hands.Clear();
@@ -178,7 +178,7 @@ namespace BlackJackLib
             hand.AddCard(card);
 
             var result = deck.Draw();
-            if (!result.IsSuccess) return Result<Hand>.Failure("Deck is empty");
+            if (result.IsFailure) return Result<Hand>.Failure("Deck is empty");
 
             var drawnCard = result.Value;
             hand.AddCard(drawnCard);
@@ -208,6 +208,17 @@ namespace BlackJackLib
             if (card1.GetCardValue != card2.GetCardValue) return Result.Failure("Can not split hand with 2 cards of different values");
 
             return Result.Success();
+        }
+        /// <summary>
+        /// Makes active hand finished
+        /// </summary>
+        public void Stand()
+        {
+            var hand = GetActiveHand();
+            if (hand != null)
+            {
+                hand.Stand();
+            }
         }
     }
 }

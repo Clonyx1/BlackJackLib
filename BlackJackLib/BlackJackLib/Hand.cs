@@ -14,10 +14,11 @@ namespace BlackJackLib
         public bool WasDoubled { get; private set; } = false;
         public bool IsResultOfSplit { get; private set; }
         public bool IsBusted => GetTotalValue() > 21;
-        public bool HasBlackJack => GetTotalValue() == 21;
+        public bool HasTwentyOne => GetTotalValue() == 21;
+        public bool HasBlackJack => GetTotalValue() == 21 && _cards.Count == 2;
         public bool IsStanding { get; private set; } = false;
         public bool IsSurrendered { get; private set; } = false;
-        public bool IsFinished  => IsBusted || HasBlackJack || IsStanding;//Whether player stands/already busted
+        public bool IsFinished  => IsBusted || HasBlackJack || HasTwentyOne || IsStanding || WasDoubled;
 
         public Hand(bool isResultOfSplit = false) 
         { 
@@ -45,10 +46,10 @@ namespace BlackJackLib
         public Result<Card> Hit(IDeck deck)
         {
             var validation = ValidateHit();
-            if (!validation.IsSuccess) return (Result<Card>)validation;
+            if (validation.IsFailure) return (Result<Card>)validation;
 
             var result = deck.Draw();
-            if (!result.IsSuccess) return result;
+            if (result.IsFailure) return result;
 
             Card card = result.Value;
             AddCard(card);
@@ -146,11 +147,12 @@ namespace BlackJackLib
         /// <summary>
         /// Doubles BetAmount
         /// </summary>
-        public void DoubleBet()
+        public void DoubleBet(IDeck deck)
         {
             HasPerformedAction = true;
             WasDoubled = true;
             BetAmount *= 2;
+            Hit(deck);
         }
         /// <summary>
         /// Returns BetAmount * multiplier
