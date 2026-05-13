@@ -4,6 +4,9 @@ using System.Text;
 
 namespace BlackJackLib
 {
+    /// <summary>
+    /// Contains all Black Jack hand logic
+    /// </summary>
     public class Hand
     {
         private List<Card> _cards = new List<Card>();

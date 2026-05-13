@@ -1,5 +1,8 @@
 ﻿namespace BlackJackLib
 {
+    /// <summary>
+    /// Used to represent Dealer
+    /// </summary>
     public class Dealer
     {
         private Hand Hand { get; } = new Hand();

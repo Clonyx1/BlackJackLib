@@ -4,6 +4,10 @@ using System.Text;
 
 namespace BlackJackLib
 {
+    /// <summary>
+    /// Represents card
+    /// Contains information about Rank, Suit, card value
+    /// </summary>
     public class Card
     {
         public CardRank Rank { get; }

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace BlackJackLib
 {
+    /// <summary>
+    /// Used to represent Player
+    /// </summary>
     public class Player
     {
         private List<Hand> _hands = new();
@@ -38,6 +41,10 @@ namespace BlackJackLib
 
             return hand.Hit(deck);
         }
+        /// <summary>
+        /// Determines whether hit is possible
+        /// </summary>
+        /// <returns></returns>
         public Result ValidateHit()
         {
             var hand = GetActiveHand();
@@ -79,11 +86,11 @@ namespace BlackJackLib
             return Result.Success();
         }
         /// <summary>
-        /// Doubles player's bet in active hand
+        /// Doubles player's bet in active hand, gives player one final card and finishes Hand
         /// </summary>
-        public Result<Hand> DoubleBet(IDeck deck)
+        public Result<Hand> DoubleDown(IDeck deck)
         {
-            var validation = ValidateDoubleBet();
+            var validation = ValidateDoubleDown();
             
             if(validation.IsFailure) return (Result<Hand>)validation;
 
@@ -93,10 +100,10 @@ namespace BlackJackLib
             return Result<Hand>.Success(hand);
         }
         /// <summary>
-        /// Validates whether player can double active hand's bet
+        /// Validates whether player can use DoubleDown method
         /// </summary>
         /// <returns></returns>
-        public Result ValidateDoubleBet()
+        public Result ValidateDoubleDown()
         {
             var hand = GetActiveHand();
             if (hand == null) return Result.Failure("Player does not have any active hands");
