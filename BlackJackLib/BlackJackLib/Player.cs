@@ -95,7 +95,7 @@ namespace BlackJackLib
             if(validation.IsFailure) return (Result<Hand>)validation;
 
             var hand = GetActiveHand();
-            hand.DoubleBet(deck);
+            hand.DoubleDown(deck);
 
             return Result<Hand>.Success(hand);
         }

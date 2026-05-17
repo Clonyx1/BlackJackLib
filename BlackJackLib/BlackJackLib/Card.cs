@@ -10,7 +10,13 @@ namespace BlackJackLib
     /// </summary>
     public class Card
     {
+        /// <summary>
+        /// Card's rank
+        /// </summary>
         public CardRank Rank { get; }
+        /// <summary>
+        /// Card's suit
+        /// </summary>
         public Suit Suit { get; }
 
         public Card(CardRank rank, Suit suit)
@@ -18,7 +24,11 @@ namespace BlackJackLib
             Rank = rank;
             Suit = suit;
         }
-
+        /// <summary>
+        /// Returns value of a card
+        /// This method will always return the max value of a Card (Ace will always return 11 using this method)
+        /// </summary>
+        /// <returns></returns>
         public int GetCardValue()
         {
             return Rank switch

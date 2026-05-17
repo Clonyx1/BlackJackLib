@@ -10,17 +10,54 @@ namespace BlackJackLib
     public class Hand
     {
         private List<Card> _cards = new List<Card>();
+        /// <summary>
+        /// Collection of cards in hand
+        /// </summary>
         public IReadOnlyCollection<Card> Cards { get { return _cards; } }
+        /// <summary>
+        /// Hand bet amount
+        /// </summary>
         public decimal BetAmount { get; private set; }
+        /// <summary>
+        /// Determines whether hand is soft
+        /// </summary>
         public bool IsSoft => IsHandSoft();
+        /// <summary>
+        /// Determines whether hand has performed any kind of action
+        /// </summary>
         public bool HasPerformedAction { get; private set; } = false;
+        /// <summary>
+        /// Keeps track of whether hand was doubled
+        /// </summary>
         public bool WasDoubled { get; private set; } = false;
+        /// <summary>
+        /// Set to true for Hands that are derived from splitting hand
+        /// </summary>
         public bool IsResultOfSplit { get; private set; }
+        /// <summary>
+        /// Keeps track of whether hand has more than 21 total value
+        /// </summary>
         public bool IsBusted => GetTotalValue() > 21;
-        public bool HasTwentyOne => GetTotalValue() == 21;
+        /// <summary>
+        /// True if Hand has 21 total value, but consists of more than 2 cards
+        /// Note that HasTwentyOne will be false when Hand has a Black Jack
+        /// </summary>
+        public bool HasTwentyOne => GetTotalValue() == 21 && _cards.Count > 2;
+        /// <summary>
+        /// True if Hand has 21 total value and consists of exactly 2 cards
+        /// </summary>
         public bool HasBlackJack => GetTotalValue() == 21 && _cards.Count == 2;
+        /// <summary>
+        /// Keeps track of whether Hand is standing
+        /// </summary>
         public bool IsStanding { get; private set; } = false;
+        /// <summary>
+        /// Keeps track of whether Hand is standing
+        /// </summary>
         public bool IsSurrendered { get; private set; } = false;
+        /// <summary>
+        /// Used to quickly determine whether it is possible to play with Hand
+        /// </summary>
         public bool IsFinished  => IsBusted || HasBlackJack || HasTwentyOne || IsStanding || WasDoubled;
 
         public Hand(bool isResultOfSplit = false) 
@@ -44,7 +81,7 @@ namespace BlackJackLib
         /// <summary>
         /// Gives player a card from deck
         /// </summary>
-        /// <param name="deck"></param>
+        /// <param name="deck">Deck to draw card from</param>
         /// <returns></returns>
         public Result<Card> Hit(IDeck deck)
         {
@@ -148,9 +185,9 @@ namespace BlackJackLib
             BetAmount += betAmount;
         }
         /// <summary>
-        /// Doubles BetAmount
+        /// Doubles BetAmount, draws a card and finishes hand
         /// </summary>
-        public void DoubleBet(IDeck deck)
+        public void DoubleDown(IDeck deck)
         {
             HasPerformedAction = true;
             WasDoubled = true;

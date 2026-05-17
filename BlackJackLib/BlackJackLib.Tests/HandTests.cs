@@ -116,7 +116,7 @@ namespace BlackJackLib.Tests
 
             //Act
             StandardDeck deck = new StandardDeck();
-            hand.DoubleBet(deck);
+            hand.DoubleDown(deck);
 
             //Assert
             var expectedValue = 100;
